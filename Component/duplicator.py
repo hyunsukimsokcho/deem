@@ -28,8 +28,8 @@ class Duplicator:
             Generate duplicate of each tuple according to zipfian dist.
 
         @params
-            k: maximum number of duplicates to generate according to zipfian dist.
-            (five is fine; HEURISTIC)
+            k: maximum number of duplicates to generate according to zipfian dist. (k>1)
+            (As k increases, number of duplicates decreases. k=4 brings about 100 duplicates; HEURISTIC)
         """
         self.size, self.num_attr = self.data.shape
 
@@ -39,17 +39,14 @@ class Duplicator:
 
         for i in range(self.size):
             n = np.random.zipf(k) - 1
-            print(n)
             # add n many duplicates into our current dataframe
             if n > 0:
                 dup = self.data.iloc[i]
-                print([dup])
                 dup['isDuplicate'] = 1.0
                 self.data = self.data.append(n*[dup], ignore_index=True)
             total = total + n
-        print("ADDED {} MANY RAW DUPLICATES".format(n))
         print(self.data)
-
+        print("ADDED {} MANY RAW DUPLICATES".format(total))
 
     def add_random_duplicate(self, k):
         pass
@@ -57,8 +54,6 @@ class Duplicator:
 
 if __name__ == "__main__":
     duplicator = Duplicator(category="GermanBank")
-    duplicator.add_raw_duplicate(5)
-    #print(duplicator.data[0][1])
-    #print(duplicator.data.iloc[0])
+    duplicator.add_raw_duplicate(4)
 
     
