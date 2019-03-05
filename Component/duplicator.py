@@ -12,9 +12,14 @@ class Duplicator:
 
         setattr(self, 'schema', open("Dataset/" + self.category + "/schema").read().splitlines())
         if os.path.isfile("Dataset/" + self.category + "/data"):
+            # No test_data provided from src
             # Cross-validation needed
             setattr(self, 'data', pd.read_csv("Dataset/" + self.category + "/data", sep=r'[,\t ]+', header=None, names=self.schema))
+            mask = np.random.rand(len(self.data)) < 0.8
+            setattr(self, 'train_data', self.data[mask])
+            setattr(self, 'test_data', self.data[~mask])
         else:
+            # test_data provided from src
             setattr(self, 'train_data', pd.read_csv("Dataset/" + self.category + "/train.data", sep=r'[,\t ]+', header=None, names=self.schema))
 
             setattr(self, 'test_data', pd.read_csv("Dataset/" + self.category + "/test.data", sep=r'[,\t ]+', header=None, names=self.schema))
@@ -59,15 +64,24 @@ class Duplicator:
             
 
 if __name__ == "__main__":
-    # possible category: "GermanBank", "AdultCensus"
-    duplicator = Duplicator(category="GermanBank")
-    print(duplicator.data)
-    duplicator.add_raw_duplicate(4)
+    # possible category: "GermanBank", "AdultCensus", "CompasRecidivism"
+    duplicatorB = Duplicator(category="GermanBank")
+    print(duplicatorB.train_data)
+    print(duplicatorB.test_data)
 
-    Censusduplicator = Duplicator(category="AdultCensus")
-    print(Censusduplicator.train_data)
-
-    Compasduplicator = Duplicator(category="CompasRecidivism")
-    print(Compasduplicator.data)
+    duplicatorC = Duplicator(category="CompasRecidivism")
+    print(duplicatorC.train_data)
+    print(duplicatorC.test_data)
+    duplicatorA = Duplicator(category="AdultCensus")
+    print(duplicatorA.train_data)
+    print(duplicatorA.test_data)
+#    print(duplicator.data)
+#    duplicator.add_raw_duplicate(4)
+#
+#    Censusduplicator = Duplicator(category="AdultCensus")
+#    print(Censusduplicator.train_data)
+#
+#    Compasduplicator = Duplicator(category="CompasRecidivism")
+#    print(Compasduplicator.data)
 
     
