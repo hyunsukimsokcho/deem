@@ -28,7 +28,7 @@ class Preprocessing:
     def data_preprocessing(self, data, train=True):
         if self.dataset == "AdultCensus":
             data_copy = data.copy()
-            data_copy["target"] = data_copy["target"].apply(lambda x:0 if (x=='<=50K' or x=='<=50K.') else 1)
+            data_copy["target"] = data_copy["target"].apply(lambda x:-1 if (x=='<=50K' or x=='<=50K.') else 1)
             x_data = data_copy.drop('target', axis =1)
             y_data = data_copy["target"]        
 
