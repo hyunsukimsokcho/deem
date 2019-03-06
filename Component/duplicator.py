@@ -54,7 +54,7 @@ class Duplicator:
             # add n many duplicates into our current dataframe
             if n > 0:
                 dup = self.train_data.iloc[i]
-                dup['isDuplicate'] = 1.0
+#                 dup['isDuplicate'] = 1.0
                 self.train_data = self.train_data.append(n*[dup], ignore_index=True)
             total = total + n
         #print(self.data)
