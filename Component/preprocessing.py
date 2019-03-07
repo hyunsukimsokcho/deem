@@ -37,13 +37,14 @@ class Preprocessing:
 
         # Cluster education and age attributes.
         # Limit education range
-        df['education_num'] = df['education_num'].apply(lambda x: group_edu(x))
-        df['education_num'] = df['education_num'].astype('category')
+        
+        #df['education_num'] = df['education_num'].apply(lambda x: group_edu(x))
+        #df['education_num'] = df['education_num'].astype('category')
         
         # Group age by decade
         # Limit age range
-        df['age'] = df['age'].apply(lambda x: x//10*10)
-        df['age'] = df['age'].apply(lambda x: age_cut(x))
+        #df['age'] = df['age'].apply(lambda x: x//10*10)
+        #df['age'] = df['age'].apply(lambda x: age_cut(x))
 
         # Recode sex and race
         # df['@sex'] = df['@sex'].replace({'Female': 0.0, 'Male': 1.0})
@@ -95,7 +96,7 @@ class Preprocessing:
         df['history'] = df['history'].apply(lambda x: group_credit_hist(x))
         df['savings'] = df['savings'].apply(lambda x: group_savings(x))
         df['employment'] = df['employment'].apply(lambda x: group_employ(x))
-        df['@age'] = df['@age'].apply(lambda x: np.float(x >= 25))
+        #df['@age'] = df['@age'].apply(lambda x: np.float(x >= 25))
 
         return df
 
@@ -114,6 +115,7 @@ class Preprocessing:
             
             train_dta = self.adult_custom_preprocessing(train_data)
             test_data = self.adult_custom_preprocessing(test_data)
+            
         elif self.dataset == "GermanBank":
             '''
             In IBM, they used only 5 attributes
@@ -126,6 +128,14 @@ class Preprocessing:
             train_data = self.german_custom_preprocessing(train_data)
             test_data = self.german_custom_preprocessing(test_data)    
         
+        elif self.dataset == "CompasRecidivism":
+            columns = ["two_yr_recidivism" ,"score_factor" ,"@age_Above_FourtyFive" ,"@age_Below_TwentyFive" ,"@african_american" ,"@asian" ,"@hispanic" ,"@native_american" ,"@other"]
+            train_data['@sex'] = train_data['@sex'].apply(lambda x: "Female" if x==1 else "Male")
+            test_data['@sex'] = test_data['@sex'].apply(lambda x: "Female" if x==1 else "Male")
+            
+            train_data[columns] = train_data[columns].astype('object')
+            test_data[columns] = test_data[columns].astype('object')
+
         train_data = train_data.dropna().reset_index(drop=True)
         test_data = test_data.dropna().reset_index(drop=True)
 
@@ -152,10 +162,14 @@ class Preprocessing:
             data_copy["y"] = data_copy["y"].apply(lambda x: 0 if x == 2 else 1)
             x_data = data_copy.drop("y", axis = 1)
             y_data = data_copy["y"]
-
-        num_data = x_data.select_dtypes(include='float')
+        elif self.dataset == 'CompasRecidivism':
+            data_copy = data.copy()
+            x_data = data_copy.drop("misdemeanor", axis = 1)
+            y_data = data_copy["misdemeanor"]
+            
+        num_data = x_data.select_dtypes(exclude='object')
         cat_data = x_data.select_dtypes(include='object')
-        
+
         if train:
             num_data = pd.DataFrame(self.scalar.fit_transform(num_data), columns=num_data.columns)
         else:
