@@ -4,10 +4,10 @@ class timer:
     def __init__(self):
         pass
 
-    def tic(self):
+    def tictic(self):
         self.tic = time.time()
 
-    def toc(self, msg):
+    def toctoc(self, msg):
         print("====="+msg+"=====\n", "%0.5f" % (time.time() - self.tic), "sec")
 
 if __name__ == "__main__":
