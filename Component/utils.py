@@ -1,6 +1,6 @@
 import time
 
-class timer:
+class Timer:
     def __init__(self):
         pass
 
@@ -11,7 +11,7 @@ class timer:
         print("====="+msg+"=====\n", "%0.5f" % (time.time() - self.tic), "sec")
 
 if __name__ == "__main__":
-    timer = timer()
+    timer = Timer()
     timer.tic()
     time.sleep(3)
     timer.toc('hello, world')

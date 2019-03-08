@@ -3,7 +3,6 @@ import numpy as np
 import copy
 import os
 import concurrent.futures
-from utils import timer
 
 class Duplicator:
     def __init__(self, **kwargs):
@@ -17,20 +16,20 @@ class Duplicator:
         if os.path.isfile("Dataset/" + self.category + "/data"):
             # No test_data provided from src
             # Cross-validation needed
-            setattr(self, 'data', pd.read_csv("Dataset/" + self.category + "/data", sep=r'[,\t ]+', header=None, names=self.schema))
+            setattr(self, 'data', pd.read_csv("Dataset/" + self.category + "/data", sep=r'[,\t ]+', header=None, names=self.schema, engine='python'))
             mask = np.random.rand(len(self.data)) < 0.8
             setattr(self, 'train_data', self.data[mask])
             setattr(self, 'test_data', self.data[~mask])
         else:
             # test_data provided from src
-            setattr(self, 'train_data', pd.read_csv("Dataset/" + self.category + "/train.data", sep=r'[,\t ]+', header=None, names=self.schema, na_values='?'))
+            setattr(self, 'train_data', pd.read_csv("Dataset/" + self.category + "/train.data", sep=r'[,\t ]+', header=None, names=self.schema, na_values='?', engine='python'))
 
-            setattr(self, 'test_data', pd.read_csv("Dataset/" + self.category + "/test.data", sep=r'[,\t ]+', header=None, names=self.schema, na_values='?'))
+            setattr(self, 'test_data', pd.read_csv("Dataset/" + self.category + "/test.data", sep=r'[,\t ]+', header=None, names=self.schema, na_values='?', engine='python'))
         setattr(self, 'size', self.train_data.shape[0])
 
     def print_origin_data(self, verbose=False):
         """ 
-        Prints original data in a redable form
+        Prints original data in a redable form with schema
         """
         if verbose:
             df = pd.read_csv("Dataset/" + self.category + "/data", sep='\s+', header=None, names=self.schema)
@@ -39,6 +38,14 @@ class Duplicator:
         print(df)
 
     def parallel_duplicate(self, n, k):
+        """
+        @description
+            Duplicate rows in data frame in parallelized fashion.
+
+        @params
+            n: number of tasks that the entire work will be splitted into (for parallel exec.)
+            k: param. for add_raw_duplicate
+        """
         with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
             batch_jobs = []
             batch_size = int(np.floor(self.size / n))
@@ -47,7 +54,7 @@ class Duplicator:
             batch_jobs.append(executor.submit(self.add_raw_duplicate, self.train_data[(n-1)*batch_size:], k, parallel=True))
             for job in concurrent.futures.as_completed(batch_jobs):
                 if job.cancelled():
-                    print("cancelled")
+                    print("[JOB cancelled]: Check what's causing abnormal behavior")
                     continue
                 elif job.done():
                     job_result = job.result()
@@ -55,7 +62,7 @@ class Duplicator:
                     self.train_data = pd.concat(frames, ignore_index=True)
                     #self.train_data = self.train_data.append(job_result, ignore_index=True)
 
-        print(self.train_data)
+        #print(self.train_data)
             
     def add_raw_duplicate(self, data, k, parallel=False):
         """
